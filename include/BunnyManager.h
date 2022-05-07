@@ -7,26 +7,34 @@
 
 class BunnyManager{
 private:
-    int currentBunnyID = 0;
-    const int waitTime = 400;
+    std::list<std::shared_ptr<Bunny>> bunnies;
+    bool matureMale=false;
+    int infectedCount=0;
+    const int CULL_AT_NUMBER = 1000; // 20;
+    const int BREEDING_AGE = 2;
+    const int MAX_HEALTHY_AGE = 10;
+    const int MAX_INFECTED_AGE = 50;
+    const int MESSAGE_TIME = 400;
+    std::list<std::shared_ptr<Bunny>> mothers;
 
 public:
-    std::list<std::shared_ptr<Bunny>> bunnies;
     BunnyManager();
     ~BunnyManager();
+    
+    bool CheckForCullKey();
+
     void AddBunny();
-    void RemoveBunny(int index);
+
     void AgeAll();
-    void TurnBunnyRadioactive();
-    bool ElderlyMale();
     void BirthNewBunnies();
-    int ElderlyFemales();
-    int RadioactiveBunnies();
+    void TurnBunnyInfected();
+    void CullBunnies();
+    int BunnyCount();
+
     void DisplayBunnyBirth(Bunny &bunny);
     void DisplayBunnyDeath(Bunny &bunny);
     void DisplayBunnyTurned(Bunny &bunny);
     void DisplayBunnies();
-    int BunnyCount();
     void KillRandomBunny();
 };
 #endif

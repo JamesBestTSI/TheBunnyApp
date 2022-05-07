@@ -2,6 +2,8 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <conio.h>
+#include <limits>
 
 BunnyManager::BunnyManager(){
     AddBunny();
@@ -16,154 +18,188 @@ BunnyManager::~BunnyManager(){};
 void BunnyManager::AddBunny()
 {
     std::shared_ptr<Bunny> bun(new Bunny());
-    bun->SetID(currentBunnyID);
     DisplayBunnyBirth(*bun);
-    currentBunnyID++;
     bunnies.push_back(std::move(bun));
 };
 
-void BunnyManager::RemoveBunny(int index)
-{
-    int count = 0;
-    for (std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin(); bunny != bunnies.end(); ++bunny)
-    {
-        if (count == index)
-        {
-            bunnies.erase(bunny++);
-            // bunnies.remove(*bunny);
-            return;
-        }
-    }
-};
-
+/**
+ * @brief Ages up all the bunnies by one year, and tracks if we have a healthy mature male who can breed,
+ * also keeps track of all the mothers that can breed so we know what new bunnies we will have to create.
+ */
 void BunnyManager::AgeAll(){
+    infectedCount = 0;
+    matureMale = false;
+    mothers.clear();
     std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin();
     while (bunny != bunnies.end()){
-        bool bunnyDeath = false;
-        (*bunny)->Age();
-        if ((*bunny)->GetAge() > 10){
-            if (!(*bunny)->GetRadioactive() || (*bunny)->GetAge() > 50)
-            {
-                // Death
-                DisplayBunnyDeath(*(*bunny));
-                bunnies.erase(bunny++);
-                bunnyDeath = true;
+        // Test to see if the bunny should die of old age
+        if ((*bunny)->GetAge() > MAX_HEALTHY_AGE && !(*bunny)->GetInfected() || (*bunny)->GetAge() > MAX_INFECTED_AGE){
+            // Death
+            DisplayBunnyDeath(*(*bunny));
+            bunnies.erase(bunny++);
+        }
+        // If the bunny did not die of old age
+        else{
+            if ((*bunny)->GetInfected())    { infectedCount++; }
+            else if ((*bunny)->GetAge() >= BREEDING_AGE){
+                switch ((*bunny)->GetSex()) {
+                    case Gender::Female:    { mothers.push_back((*bunny));  break;}
+                    case Gender::Male:      { matureMale = true;            break;}
+                }
+            }
+            (*bunny)->GrowUp();
+            ++bunny;
+        }
+    }
+};
+
+/**
+ * @brief Creates new bunnies based on the mothers colours 
+ */
+void BunnyManager::BirthNewBunnies(){
+    for (std::list<std::shared_ptr<Bunny>>::iterator mother = mothers.begin(); mother != mothers.end(); ++mother) {
+        std::shared_ptr<Bunny> babyBunny(new Bunny((*mother)->GetColour()));
+        DisplayBunnyBirth(*babyBunny);
+        bunnies.push_back(std::move(babyBunny));
+    }
+    mothers.clear();
+};
+
+/**
+ * @brief Turns some bunnies infected based on how many are currently infected
+ */
+void BunnyManager::TurnBunnyInfected(){
+    int healthybunnies = bunnies.size()- infectedCount;
+    int healthyoffset = healthybunnies / (infectedCount + 1);
+    if (healthyoffset <= 0){healthyoffset = 0;}
+
+    int currentOffset = 0;
+    int infected = 0;
+    for (std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin(); bunny != bunnies.end(); ++bunny)
+    {
+        if (!(*bunny)->GetInfected()){
+            if (currentOffset == healthyoffset){
+                (*bunny)->Infect();
+                DisplayBunnyTurned(*(*bunny));
+                currentOffset = 0;
+                infected++;
+            }
+            else{
+                currentOffset++;
             }
         }
-        if (!bunnyDeath)
-            ++bunny;
-    }
-};
-
-void BunnyManager::TurnBunnyRadioactive(){
-    for (std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin(); bunny != bunnies.end(); ++bunny)
-    {
-        if (!(*bunny)->GetRadioactive()){
-            (*bunny)->SetRadioactive();
-            DisplayBunnyTurned(*(*bunny));
+        if (infected == infectedCount)
             return;
-        }
     }
 };
 
-bool BunnyManager::ElderlyMale()
+bool BunnyManager::CheckForCullKey()
 {
-    for (std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin(); bunny != bunnies.end(); ++bunny)
+    std::cout << "Press any key to cull the rabbits" << std::endl;
+    float seconds = 0;
+    while (seconds < 2)
     {
-        if ((*bunny)->GetAge() > 2 && (*bunny)->GetSex() ==Gender::Male && !(*bunny)->GetRadioactive()){
+        if (_kbhit())
+        {
+            char dumpBuffer = getch(); // Empties the keyboard buffer so we dont loop
             return true;
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        seconds += 0.1;
     }
     return false;
-};
+}
 
-int BunnyManager::ElderlyFemales()
-{
-    int counter = 0;
-    for (std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin(); bunny != bunnies.end(); ++bunny)
+/**
+ * @brief Kills off half the bunnies randomly
+ */
+void BunnyManager::CullBunnies(){
+    if (bunnies.size() > CULL_AT_NUMBER || CheckForCullKey())
     {
-        if ((*bunny)->GetAge() > 2 && (*bunny)->GetSex() == Gender::Female && !(*bunny)->GetRadioactive())
-        {
-            counter++;
+        std::cout << "######################################################" << std::endl;
+        std::cout << "                        Culling" << std::endl;
+        std::cout << "######################################################" << std::endl;
+        int cullAmount = bunnies.size() / 2;
+        int culled = 0;
+        bool toggle = rand() % 2 == 0;
+
+        std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin();
+        while (bunny != bunnies.end()) {
+            if (toggle){
+                DisplayBunnyDeath(*(*bunny));
+                bunnies.erase(bunny++);
+                culled++;
+            }
+            else{
+                ++bunny;
+            }
+            if (culled == cullAmount){return;}
+            toggle = !toggle;
         }
     }
-    return counter;
-};
+}
 
-void BunnyManager::BirthNewBunnies(){
-    for (std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin(); bunny != bunnies.end(); ++bunny)
-    {
-        if ((*bunny)->GetAge() > 2 && (*bunny)->GetSex() == Gender::Female && !(*bunny)->GetRadioactive())
-        {
-            std::shared_ptr<Bunny> bun(new Bunny(*(*bunny)));
-            bun->SetID(currentBunnyID);
-            DisplayBunnyBirth(*bun);
-            currentBunnyID++;
-            bunnies.push_back(std::move(bun));
-        }
-    }
-};
+/**
+ * @brief Counts how many bunnies there are
+ * 
+ * @return int the amount of bunnies
+ */
+int BunnyManager::BunnyCount(){
+    return bunnies.size();
+}
 
-int BunnyManager::RadioactiveBunnies(){
-    int counter = 0;
-    for (std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin(); bunny != bunnies.end(); ++bunny)
-    {
-        if ((*bunny)->GetRadioactive()){
-            counter++;
-        }
-    }
-    return counter;
-};
+
+
+
+
 
 void BunnyManager::DisplayBunnyBirth(Bunny &bunny){
-    if (bunny.GetRadioactive()) {std::cout << "Radioactive ";}
-    else                    {std::cout << "Normal ";}
-    std::cout << bunny.GetColourName();
+    if (bunny.GetInfected()) {std::cout << "Infected ";}
+    else                     {std::cout << "Normal ";}
+    std::cout << bunny.GetColourAsString();
     (bunny.GetSex() == Gender::Male) ? (std::cout << " Male ") : (std::cout << " Female ");
     std::cout << "called " << bunny.GetName() << " was born!" << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+    std::this_thread::sleep_for(std::chrono::milliseconds(MESSAGE_TIME));
 };
 
 void BunnyManager::DisplayBunnyDeath(Bunny &bunny){
-    if (bunny.GetRadioactive()) {std::cout << "Radioactive ";}
+    if (bunny.GetInfected()) {std::cout << "Infected ";}
     else                        {std::cout << "Normal ";}
     std::cout << bunny.GetAge() << " year old ";
     // Colour
-    std::cout << bunny.GetColourName();
+    std::cout << bunny.GetColourAsString();
     (bunny.GetSex() == Gender::Male) ? (std::cout << " Male ") : (std::cout << " Female ");
     std::cout << "called " << bunny.GetName() << " died!" << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+    std::this_thread::sleep_for(std::chrono::milliseconds(MESSAGE_TIME));
 };
 
 void BunnyManager::DisplayBunnyTurned(Bunny &bunny){
-    std::cout << "Normal bunny " << bunny.GetName() << " turned Radioactive!" << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+    std::cout << "Normal bunny " << bunny.GetName() << " became Infected!" << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(MESSAGE_TIME));
 };
 
 void BunnyManager::DisplayBunnies(){
-    std::list<std::shared_ptr<Bunny>> bunniesSorted = bunnies;
-    //bunniesSorted.sort();
-
-    for (std::list<std::shared_ptr<Bunny>>::iterator bunny = bunniesSorted.begin(); bunny != bunniesSorted.end(); ++bunny)
+    for (std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin(); bunny != bunnies.end(); ++bunny)
     {
-        if ((*bunny)->GetRadioactive()) {std::cout << "Radioactive bunny ";}
-        else                            {std::cout << "Normal bunny ";}
+        if ((*bunny)->GetInfected()) {std::cout << "Infected ";}
+        else                            {std::cout << "Normal ";}
         std::cout << (*bunny)->GetAge() << " year old ";
         // Colour
-        std::cout << (*bunny)->GetColourName();
+        std::cout << (*bunny)->GetColourAsString();
         ((*bunny)->GetSex() == Gender::Male) ? (std::cout << " Male ") : (std::cout << " Female ");
-        std::cout << "called " << (*bunny)->GetName() << std::endl;
+        std::cout << "bunny called " << (*bunny)->GetName() << std::endl;
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+    std::this_thread::sleep_for(std::chrono::milliseconds(MESSAGE_TIME));
     std::cout << std::endl;
 };
 
-int BunnyManager::BunnyCount(){
-    return bunnies.size();
-};
+
+
+
+
 
 void BunnyManager::KillRandomBunny(){
-    int randomValue = rand() % BunnyCount();
+    int randomValue = rand() % bunnies.size();
     std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin();
     std::advance(bunny, randomValue);
     DisplayBunnyDeath(*(*bunny));
