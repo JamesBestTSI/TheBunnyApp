@@ -42,8 +42,7 @@
 + In our loop to age a bunny, before we age them up, check how old the bunny is.
 + If > 10, kill the bunny and remove it from the list.
 + NOTE: When removing from the list you can use listname.erase(++bunnyToRemove)
-+             However if you do this, then you will be setting the bunny itterator to the next bunny, so only do a bunny++ if you age up the bunny
-+             and use listname.erase(++bunny) if you are killing it off. (While loop might be useful)
++ However if you do this, then you will be setting the bunny itterator to the next bunny, so only do a bunny++ if you age up the bunny and use listname.erase(++bunny) if you are killing it off. (While loop might be useful)
 
 # Infected Part 1
 + When you loop through all the bunnies, count how many are infected. (store it in bunny manager)
