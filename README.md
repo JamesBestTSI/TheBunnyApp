@@ -1,4 +1,4 @@
-#Bunnies
+# Bunnies
 + Create a Bunny Class that has variables for: 
 + Sex: 		Male, Female
 + Colour: 	White, brown, black, spotted
@@ -12,24 +12,24 @@
 + Set name to a random name (Pick one from a list/array)
 + Set infected with 2% chance of true (random number 1-100 if 1 or 2 etc)
 
-#Bunny List
+# Bunny List
 + Create Bunny Manager Class
 + Make it hold a list of bunnys (pointers)
 + Create a AddBunny function thats adds a new bunny to the list.
 + In its constructor, add 5 random bunnies to the list.
  
-#Bunnies Grow Older
+# Bunnies Grow Older
 + Create a function in the bunny class that makes the bunny 1 year older
 + Create a function in the Bunny manager class that loops through all the bunnies and calls their age 1 year older function.
 + Make an instance of the bunny manager in main.
 + Create a loop in main (Your main loop) and call the AgeAllBunnies function so each turn (loop) they get one year older.
  
-#Breeding Part 1
+# Breeding Part 1
 + Create a bool (flag) for if we have a breedable male, inside of the bunny manager.
 + Before we loop through the list of bunnies, set it to false as we dont know if we have a old enough male.
 + When we loop through the list of bunnies in order to age them, if we find a male bunny older then 2, set the flag to true.
  
-#Breeding Part 2
+# Breeding Part 2
 + Create a list of bunny pointers inside of the bunny manager, for all the breedable females.
 + Before we loop through the list of bunnies, clear the list.
 + When we loop throguh the list of bunnies, add any bunny that is a breedable female. (think shared_pointers)
@@ -38,34 +38,34 @@
 + After looping through all bunnies to age them up. We now have a flag for if we have a male thats old enough, and a list of mothers.
 + Loop through all the mothers and create a new bunny using the mother, only if the Male flag is true.
 
-#Bunny Death
+# Bunny Death
 + In our loop to age a bunny, before we age them up, check how old the bunny is.
 + If > 10, kill the bunny and remove it from the list.
 + NOTE: When removing from the list you can use listname.erase(++bunnyToRemove)
 +             However if you do this, then you will be setting the bunny itterator to the next bunny, so only do a bunny++ if you age up the bunny
 +             and use listname.erase(++bunny) if you are killing it off. (While loop might be useful)
 
-#Infected Part 1
+# Infected Part 1
 + When you loop through all the bunnies, count how many are infected. (store it in bunny manager)
 + After loop ends, use a function that will infect that many healthy bunnies.
 + (loop through all the bunnies, and if healthy make it infected untill we have infected the needed amount)
 
-#Infected Part 2
+# Infected Part 2
 + Update the breedable male check, to not include infected males.
 + Update the adding to list of possible mothers check to not add infected.
 + Update the death check to see if they are >10 and healthy OR >50
  
-#Display Info
+# Display Info
 + Make a function in the bunny manager that loops through all the bunnies and prints out their info.
 + Place this in th emain loop
 + Make a function that displays a bunny being boorn/dying/being infected
 + Everytime a action is called in the main aging loop call the fcorrect info function 
 
-#When all the bunnies have died the program terminates.
+# When all the bunnies have died the program terminates.
 + Make a function that returns the size of the list
 + Make tha main loop exit if that returns 0
 
-#Culling
+# Culling
 + If bunnylist.size >1000
 + Kill off half the bunnies
 + How you kill them is up to you.
