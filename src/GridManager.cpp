@@ -19,7 +19,7 @@ void GridManager::DrawGrid(){
             std::cout << grid[gridspot]->GetBunnyFromSpace()->GetIcon();
         }
         else{
-            std::cout << "-";
+            std::cout << "`";
         }
     }
 };

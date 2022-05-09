@@ -21,9 +21,10 @@ int main()
         fputs("\x1b[H\x1b[2J\x1b[3J", stdout);
         fflush(stdout);
         bunnyManager.DrawGrid();
-        std::cout << "\n############################################################################" << std::endl;
-
+        std::cout << "\n"
+                  << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(TURN_DURATION));
+
         //   Display all the bunnies
         std::cout << "######################################################" << std::endl;
         std::cout << "                     "<<bunnyManager.BunnyCount()<<" Bunnies" << std::endl;
@@ -45,8 +46,8 @@ int main()
         std::cout << "                        Infected" << std::endl;
         std::cout << "######################################################" << std::endl;
         bunnyManager.TurnBunnyInfected();
-
         std::cout << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(TURN_DURATION));
     }
 
     return 0;

@@ -8,8 +8,8 @@
 class GridManager
 {
 private:
-    const static int GRID_WIDTH = 80;
-    const static int GRID_HEIGHT = 80;
+    const static int GRID_WIDTH = 160;
+    const static int GRID_HEIGHT = 40;
     std::vector<std::shared_ptr<GridSpace>> grid;
     std::list<std::shared_ptr<GridSpace>> availableSpaces;
 
