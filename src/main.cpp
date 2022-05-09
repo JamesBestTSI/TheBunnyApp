@@ -16,7 +16,8 @@ int main()
     BunnyManager bunnyManager;
     while (bunnyManager.BunnyCount()>0)
     {
-        // system("cls") but working in terminal
+        // system("cls") but working in terminal 
+        system("cls");
         fputs("\x1b[H\x1b[2J\x1b[3J", stdout);
         fflush(stdout);
         bunnyManager.DrawGrid();
