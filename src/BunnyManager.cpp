@@ -20,27 +20,31 @@ void BunnyManager::AddBunny()
     std::shared_ptr<Bunny> bun(new Bunny());
     DisplayBunnyBirth(*bun);
     bunnies.push_back(std::move(bun));
+    gridManager.AddBunnyToGrid(bunnies.back());
 };
 
 /**
  * @brief Ages up all the bunnies by one year, and tracks if we have a healthy mature male who can breed,
  * also keeps track of all the mothers that can breed so we know what new bunnies we will have to create.
  */
-void BunnyManager::AgeAll(){
+void BunnyManager::UpdateAll()
+{
     infectedCount = 0;
     matureMale = false;
     mothers.clear();
+    infected.clear();
     std::list<std::shared_ptr<Bunny>>::iterator bunny = bunnies.begin();
     while (bunny != bunnies.end()){
         // Test to see if the bunny should die of old age
         if ((*bunny)->GetAge() > MAX_HEALTHY_AGE && !(*bunny)->GetInfected() || (*bunny)->GetAge() > MAX_INFECTED_AGE){
             // Death
             DisplayBunnyDeath(*(*bunny));
+            gridManager.RemoveBunnyFromGrid((*bunny)->GetLocation());
             bunnies.erase(bunny++);
         }
         // If the bunny did not die of old age
         else{
-            if ((*bunny)->GetInfected())    { infectedCount++; }
+            if ((*bunny)->GetInfected())    { infectedCount++; infected.push_back((*bunny));}
             else if ((*bunny)->GetAge() >= BREEDING_AGE){
                 switch ((*bunny)->GetSex()) {
                     case Gender::Female:    { mothers.push_back((*bunny));  break;}
@@ -48,6 +52,15 @@ void BunnyManager::AgeAll(){
                 }
             }
             (*bunny)->GrowUp();
+
+            // Move bunny
+            std::vector<std::shared_ptr<GridSpace>> availableSpaces = gridManager.GetEmptyConnectingGridSpaces((*bunny)->GetLocation());
+            if (availableSpaces.size()>0){
+                int bunnyLocation = (*bunny)->GetLocation();
+                gridManager.RemoveBunnyFromGrid((*bunny)->GetLocation());                
+                std::shared_ptr<GridSpace> space = availableSpaces[rand() % availableSpaces.size()];
+                space->AddBunnyToSpace((*bunny));
+            }
             ++bunny;
         }
     }
@@ -57,10 +70,18 @@ void BunnyManager::AgeAll(){
  * @brief Creates new bunnies based on the mothers colours 
  */
 void BunnyManager::BirthNewBunnies(){
-    for (std::list<std::shared_ptr<Bunny>>::iterator mother = mothers.begin(); mother != mothers.end(); ++mother) {
-        std::shared_ptr<Bunny> babyBunny(new Bunny((*mother)->GetColour()));
-        DisplayBunnyBirth(*babyBunny);
-        bunnies.push_back(std::move(babyBunny));
+    if (matureMale){
+        for (std::list<std::shared_ptr<Bunny>>::iterator mother = mothers.begin(); mother != mothers.end(); ++mother) {
+            std::vector<std::shared_ptr<GridSpace>> availableSpaces = gridManager.GetEmptyConnectingGridSpaces((*mother)->GetLocation());
+            if (availableSpaces.size() > 0)
+            {
+                std::shared_ptr<Bunny> babyBunny(new Bunny((*mother)->GetColour()));
+                DisplayBunnyBirth(*babyBunny);
+                bunnies.push_back(std::move(babyBunny));
+                std::shared_ptr<GridSpace> space = availableSpaces[rand() % availableSpaces.size()];
+                space->AddBunnyToSpace(bunnies.back());
+            }
+        }
     }
     mothers.clear();
 };
@@ -69,6 +90,18 @@ void BunnyManager::BirthNewBunnies(){
  * @brief Turns some bunnies infected based on how many are currently infected
  */
 void BunnyManager::TurnBunnyInfected(){
+    for (std::list<std::shared_ptr<Bunny>>::iterator Infected = infected.begin(); Infected != infected.end(); ++Infected)
+    {
+        std::vector<std::shared_ptr<GridSpace>> spacesWithBunnies = gridManager.GetUsedConnectingGridSpaces((*Infected)->GetLocation());
+        if (spacesWithBunnies.size() > 0)
+        {
+            std::shared_ptr<Bunny> bun = spacesWithBunnies[rand() % spacesWithBunnies.size()]->GetBunnyFromSpace();
+            bun->Infect();
+            DisplayBunnyTurned(*bun);
+        }
+    }
+
+    /*
     int healthybunnies = bunnies.size()- infectedCount;
     int healthyoffset = healthybunnies / (infectedCount + 1);
     if (healthyoffset <= 0){healthyoffset = 0;}
@@ -90,7 +123,7 @@ void BunnyManager::TurnBunnyInfected(){
         }
         if (infected == infectedCount)
             return;
-    }
+    }*/
 };
 
 bool BunnyManager::CheckForCullKey()
@@ -127,6 +160,7 @@ void BunnyManager::CullBunnies(){
         while (bunny != bunnies.end()) {
             if (toggle){
                 DisplayBunnyDeath(*(*bunny));
+                gridManager.RemoveBunnyFromGrid((*bunny)->GetLocation());
                 bunnies.erase(bunny++);
                 culled++;
             }
@@ -205,3 +239,9 @@ void BunnyManager::KillRandomBunny(){
     DisplayBunnyDeath(*(*bunny));
     bunnies.erase(bunny++);
 }
+
+
+void BunnyManager::DrawGrid()
+{
+    gridManager.DrawGrid();
+};

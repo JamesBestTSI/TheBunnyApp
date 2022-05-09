@@ -9,6 +9,8 @@ private:
     int age;
     std::string name;
     bool infected;
+    char Icon;
+    int location;
 
 public:
     Bunny();
@@ -21,6 +23,9 @@ public:
     std::string GetName();
     bool        GetInfected();
     std::string GetColourAsString();
+    char        GetIcon();
+    int         GetLocation();
+    void        SetLocation(int loc);
 
     // Methods
     void Infect();

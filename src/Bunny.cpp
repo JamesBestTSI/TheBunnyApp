@@ -27,6 +27,10 @@ Bunny::Bunny(){
     // Set Name
     randomValue = rand() % bunnyNames.size();
     name = bunnyNames[randomValue];
+    // Set Icon
+    (sex == Gender::Male) ? (Icon = 'm') : (Icon = 'f');
+    if (infected)
+        Icon = 'X';
 };
 
 /**
@@ -51,6 +55,10 @@ Bunny::Bunny(Colours colourWanted){
     // Set Name
     randomValue = rand() % bunnyNames.size();
     name = bunnyNames[randomValue];
+    // Set Icon
+    (sex == Gender::Male) ? (Icon = 'm') : (Icon = 'f');
+    if (infected)
+        Icon = 'X';
 }
 
 
@@ -62,8 +70,21 @@ int         Bunny::GetAge()             { return age;};
 std::string Bunny::GetName()            { return name;};
 bool        Bunny::GetInfected()        { return infected; };
 std::string Bunny::GetColourAsString()  { return ColourNames[colour];}
+char        Bunny::GetIcon()            { return Icon; }
+int         Bunny::GetLocation()        { return location; }
+void        Bunny::SetLocation(int loc) { location = loc; }
 
 // Methods
 
-void Bunny::Infect()    { infected = true;}
-void Bunny::GrowUp()    { age++;}
+void Bunny::Infect()    { 
+    infected = true;
+    Icon = 'X';
+}
+void Bunny::GrowUp()    { 
+    age++; 
+    if (age == 2 && !infected)
+    {
+        // Set Icon
+        (sex == Gender::Male) ? (Icon = 'M') : (Icon = 'F');
+    }
+}

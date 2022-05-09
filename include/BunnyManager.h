@@ -4,6 +4,7 @@
 #include <list>
 #include <memory>
 #include "Bunny.h"
+#include "GridManager.h"
 
 class BunnyManager{
 private:
@@ -16,6 +17,9 @@ private:
     const int MAX_INFECTED_AGE = 50;
     const int MESSAGE_TIME = 400;
     std::list<std::shared_ptr<Bunny>> mothers;
+    std::list<std::shared_ptr<Bunny>> infected;
+
+    GridManager gridManager;
 
 public:
     BunnyManager();
@@ -25,7 +29,7 @@ public:
 
     void AddBunny();
 
-    void AgeAll();
+    void UpdateAll();
     void BirthNewBunnies();
     void TurnBunnyInfected();
     void CullBunnies();
@@ -36,5 +40,7 @@ public:
     void DisplayBunnyTurned(Bunny &bunny);
     void DisplayBunnies();
     void KillRandomBunny();
+
+    void DrawGrid();
 };
 #endif
