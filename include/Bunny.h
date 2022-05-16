@@ -14,7 +14,7 @@ private:
 
 public:
     Bunny();
-    Bunny(Colours colourWanted);
+    explicit Bunny(Colours colourWanted);
 
     // Get/Set
     Gender      GetSex();

@@ -1,14 +1,12 @@
 #include "../include/GridSpace.h"
 
-GridSpace::GridSpace()
+GridSpace::GridSpace() : bunny{nullptr}
 {
-    bunny = nullptr;
     indexValue = 0;
 };
 
-GridSpace::GridSpace(int index)
+GridSpace::GridSpace(int index) : bunny{nullptr}
 {
-    bunny = nullptr;
     indexValue = index;
 };
 

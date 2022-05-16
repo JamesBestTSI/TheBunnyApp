@@ -10,7 +10,8 @@
  */
 Bunny::Bunny(){
     // Set Age
-    age = 0;    
+    age = 0;
+    location = -1;
     // Get random value
     int randomValue = rand() % 100;
     // Set Gender

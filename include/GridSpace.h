@@ -13,7 +13,7 @@ private:
 
 public:
     GridSpace();
-    GridSpace(int index);
+    explicit GridSpace(int index);
     ~GridSpace();
     void AddBunnyToSpace(std::shared_ptr<Bunny> bun);
     void ClearSpace();
