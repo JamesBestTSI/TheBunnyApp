@@ -58,8 +58,10 @@ Bunny::Bunny(Colours colourWanted){
     name = bunnyNames[randomValue];
     // Set Icon
     (sex == Gender::Male) ? (Icon = 'm') : (Icon = 'f');
-    if (infected)
-        Icon = 'X';
+    if (infected){
+        Icon = 'X';}
+
+    location = -1;
 }
 
 

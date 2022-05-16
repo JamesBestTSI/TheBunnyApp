@@ -183,10 +183,6 @@ int BunnyManager::BunnyCount(){
 }
 
 
-
-
-
-
 void BunnyManager::DisplayBunnyBirth(Bunny &bunny){
     if (bunny.GetInfected()) {std::cout << "Infected ";}
     else                     {std::cout << "Normal ";}
@@ -226,11 +222,6 @@ void BunnyManager::DisplayBunnies(){
     std::this_thread::sleep_for(std::chrono::milliseconds(MESSAGE_TIME));
     std::cout << std::endl;
 };
-
-
-
-
-
 
 void BunnyManager::KillRandomBunny(){
     int randomValue = rand() % bunnies.size();
